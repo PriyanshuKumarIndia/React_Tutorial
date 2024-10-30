@@ -4,6 +4,7 @@ export const PostLists = createContext({
   postList: [],
   addPost: () => {},
   deletePost: () => {},
+  addInitialPosts: () => {},
 });
 
 const dispatcher = (currPostList, action) => {
@@ -12,19 +13,16 @@ const dispatcher = (currPostList, action) => {
     new_list = currPostList.filter((post) => post.id !== action.payload.postID);
   } else if (action.type === "add_post") {
     new_list = [action.payload, ...currPostList];
+  } else if (action.type === "add_Initial_posts") {
+    new_list = action.payload.posts;
   }
-
   return new_list;
 };
 
 const PostListProvider = ({ children }) => {
-  const [postList, dispatchPostList] = useReducer(
-    dispatcher,
-    default_post_list
-  );
+  const [postList, dispatchPostList] = useReducer(dispatcher, []);
 
   const addPost = (userID, postTitle, postContent, reactions, tags) => {
-    console.log(postContent);
     const action = {
       type: "add_post",
       payload: {
@@ -38,6 +36,17 @@ const PostListProvider = ({ children }) => {
     };
     dispatchPostList(action);
   };
+
+  const addInitialPosts = (posts) => {
+    const action = {
+      type: "add_Initial_posts",
+      payload: {
+        posts,
+      },
+    };
+    dispatchPostList(action);
+  };
+
   const deletePost = (postID) => {
     const action = {
       type: "delete_post",
@@ -50,29 +59,12 @@ const PostListProvider = ({ children }) => {
   };
 
   return (
-    <PostLists.Provider value={{ postList, addPost, deletePost }}>
+    <PostLists.Provider
+      value={{ postList, addPost, deletePost, addInitialPosts }}
+    >
       {children}
     </PostLists.Provider>
   );
 };
-
-const default_post_list = [
-  {
-    id: "1",
-    title: "Going to mumbai",
-    body: "Hi friends, I am going to mumbai for my vacations. Hope to enjoy a lot.",
-    reactions: 2,
-    userID: "user-9",
-    tags: ["mumbai", "vacation", "enjoying"],
-  },
-  {
-    id: "2",
-    title: "Got the degree",
-    body: "Hi friends, finally passed and got the degree after 4 year of struggle",
-    reactions: 5,
-    userID: "user-7",
-    tags: ["education", "collegelife", "enjoying"],
-  },
-];
 
 export default PostListProvider;
